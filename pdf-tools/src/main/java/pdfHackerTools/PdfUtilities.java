@@ -24,7 +24,10 @@ public class PdfUtilities {
 	 * Variables and objects used within the whole package
 	 ********************************************************/
 	// set 16MB as maximum file length
+	// TODO: There is one file with 16.058.818 Bytes which is too big as well,
+	// so this value should be changed to a smaller one.
 	private static final long DEFAULT_MAX_FILE_LENGTH = 1024 * 1024 * 16;
+
 	static BufferedReader PdfHeaderTest;
 
 	/*********************************************************
@@ -226,22 +229,28 @@ public class PdfUtilities {
 		String XmpMetadata;
 		PdfReader reader;
 		try {
-			reader = new PdfReader(file.toString());
-			// There is no PDF/A compliance before PDF 1.4
-			if (reader.getPdfVersion() > 3) {
-				if (reader.getMetadata() != null) {
-					XmpMetadata = new String(reader.getMetadata()); // nullpointerException
-					reader.close();
-					if (XmpMetadata.contains("pdfaid:conformance")) {
-						pdfType = "PDF/A";
-					} else {
-						pdfType = "PDF 1.4 or higher";
+			try {
+				reader = new PdfReader(file.toString());
+				// There is no PDF/A compliance before PDF 1.4
+				if (reader.getPdfVersion() > 3) {
+					if (reader.getMetadata() != null) {
+						XmpMetadata = new String(reader.getMetadata()); // nullpointerException
+						reader.close();
+						if (XmpMetadata.contains("pdfaid:conformance")) {
+							pdfType = "PDF/A";
+						} else {
+							pdfType = "PDF 1.4 or higher";
+						}
 					}
+				} else {
+					pdfType = "PDF 1.0 - 1.3";
 				}
-			} else {
-				pdfType = "PDF 1.0 - 1.3";
+				return pdfType;
+			} catch (OutOfMemoryError e) {
+				System.out.println(e);
+				pdfType = "Too big";
+				return pdfType;
 			}
-			return pdfType;
 		} catch (java.lang.NullPointerException e) {
 			System.out.println(e);
 			pdfType = "PDF cannot be read by PdfReader";
@@ -337,10 +346,10 @@ public class PdfUtilities {
 	}
 
 	public static boolean checkPdfSize(String filePath) {
-		File toCheck = new File (filePath);
+		File toCheck = new File(filePath);
 		return checkPdfSize(toCheck);
 	}
-	
+
 	public static boolean isFileTooLong(File toCheck, long maxLength) {
 		return (toCheck.length() > maxLength);
 	}

@@ -230,6 +230,8 @@ public class PdfUtilities {
 		PdfReader reader;
 		try {
 			try {
+				// TODO: it would be really good to add a time thing here. If
+				// the reader needs more than 60 sec to read, it's too long
 				reader = new PdfReader(file.toString());
 				// There is no PDF/A compliance before PDF 1.4
 				if (reader.getPdfVersion() > 3) {

@@ -10,7 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 
 public class PdfChecker {
 
-	static String t;
+	static String ExaminedFolder;
 
 	static int PdfHeader;
 	static int NoPdfHeader;
@@ -28,13 +28,13 @@ public class PdfChecker {
 
 		try {
 
-			t = PdfUtilities.chooseFolder();
+			ExaminedFolder = PdfUtilities.chooseFolder();
 
 			// TODO: Create an XML Writer
 
-			if (t != null) {
+			if (ExaminedFolder != null) {
 
-				ArrayList<File> files = PdfUtilities.getPaths(new File(t),
+				ArrayList<File> files = PdfUtilities.getPaths(new File(ExaminedFolder),
 						new ArrayList<File>());
 				if (files == null)
 					return;

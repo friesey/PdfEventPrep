@@ -17,17 +17,14 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 public class iTextRepairPdf {
 
-	static String t;
+	static String ExaminedFolder;
 
 	public static void main(String args[]) throws FileNotFoundException {
 
 		try {
-
-			t = PdfUtilities.chooseFolder();
-
-			if (t != null) {
-
-				ArrayList<File> files = PdfUtilities.getPaths(new File(t),
+			ExaminedFolder = PdfUtilities.chooseFolder();
+			if (ExaminedFolder!= null) {
+				ArrayList<File> files = PdfUtilities.getPaths(new File(ExaminedFolder),
 						new ArrayList<File>());
 				if (files == null)
 					return;
@@ -87,7 +84,7 @@ public class iTextRepairPdf {
 		Map info = reader.getInfo();
 		Document document = new Document();
 
-		PdfCopy copy = new PdfCopy(document, new FileOutputStream(t + "//"
+		PdfCopy copy = new PdfCopy(document, new FileOutputStream(ExaminedFolder + "//"
 				+ "Mig_iText" + filename));
 		copy.setPDFXConformance(PdfWriter.PDFA1B); 
 			document.addTitle((String) info.get("Title"));

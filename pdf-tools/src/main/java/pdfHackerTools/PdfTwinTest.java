@@ -4,8 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-
 public class PdfTwinTest {
 
 	static String OrgPdf;
@@ -13,7 +11,7 @@ public class PdfTwinTest {
 	static long filesizeOrg;
 	static long filesizeMig;
 
-	static String t;
+	static String ExaminedFolder;
 
 	static PrintWriter outputfile;
 
@@ -22,11 +20,11 @@ public class PdfTwinTest {
 		System.out
 				.println("Please select the folder for outputfile 'PdfTwinTest.txt'");
 
-		t = PdfUtilities.chooseFolder();
+		ExaminedFolder = PdfUtilities.chooseFolder();
 
-		if (t != null) {
+		if (ExaminedFolder != null) {
 
-			outputfile = new PrintWriter(new FileWriter(t
+			outputfile = new PrintWriter(new FileWriter(ExaminedFolder
 					+ "\\PdfTwinTester.txt"));
 			outputfile.println("Pdf Twin Test");
 
@@ -41,139 +39,86 @@ public class PdfTwinTest {
 
 			if (OrgPdf != null && MigPdf != null) {
 
-				// the real program starts here, everything else are just
-				// prerequisites
+				if (PdfUtilities.testPdfOk(OrgPdf) == true
+						&& PdfUtilities.testPdfOk(MigPdf) == true) {
 
-				filesizeOrg = OrgPdf.length();
-				filesizeMig = MigPdf.length();
+					String[] LinesOrg = PdfUtilities.extractsPdfLines(OrgPdf);
+					String[] LinesMig = PdfUtilities.extractsPdfLines(MigPdf);
 
-				if (filesizeOrg < 16000000 && filesizeMig < 16000000) {
+					int differences = 0;
 
-					if (PdfUtilities.testFileHeader(OrgPdf) == true
-							&& PdfUtilities.testFileHeader(MigPdf) == true) {
+					int lenOrg = LinesOrg.length;
+					int lenMig = LinesMig.length;
 
-						PDDocument testfileOrg = PDDocument.load(OrgPdf);
-						PDDocument testfileMig = PDDocument.load(MigPdf);
+					outputfile.println(OrgPdf + " has " + lenOrg + " lines.");
+					outputfile.println(OrgPdf + " has " + lenMig + " lines.");
 
-						if (testfileOrg.isEncrypted()
-								|| testfileMig.isEncrypted()) {
-
-							System.out
-									.println("One or both of the Pdf-files are encrypted.");
+					if (lenOrg != lenMig) {
+						if (lenOrg > lenMig) {
+							outputfile.println("The migrated Pdf has"
+									+ (lenOrg - lenMig) + " lines less.");
 						} else {
+							outputfile.println("The migrated PDf has"
+									+ (lenMig - lenOrg) + " lines more.");
+						}
+						outputfile.println();
+					}
 
-							if (PdfUtilities.checkBrokenPdf(OrgPdf) == false
-									&& PdfUtilities.checkBrokenPdf(MigPdf) == false) {
-								String[] LinesOrg = PdfUtilities
-										.extractsPdfLines(OrgPdf);
-								String[] LinesMig = PdfUtilities
-										.extractsPdfLines(MigPdf);
+					//TODO: Create a method for the actual comparison?
+					
+					if ((lenOrg > lenMig || lenOrg == lenMig)) {
 
-								int differences = 0;
+						for (int j = 0; j < lenMig; j++) {
 
-								int lenOrg = LinesOrg.length;
-								int lenMig = LinesMig.length;
-
-								outputfile.println(OrgPdf + " has " + lenOrg
-										+ " lines.");
-								outputfile.println(OrgPdf + " has " + lenMig
-										+ " lines.");
-
-								if (lenOrg != lenMig) {
-									if (lenOrg > lenMig) {
-										outputfile
-												.println("The migrated Pdf has"
-														+ (lenOrg - lenMig)
-														+ " lines less.");
-									} else {
-										outputfile
-												.println("The migrated PDf has"
-														+ (lenMig - lenOrg)
-														+ " lines more.");
-									}
-									outputfile.println();
-								}
-
-								if ((lenOrg > lenMig || lenOrg == lenMig)) {
-
-									for (int j = 0; j < lenMig; j++) {
-
-										if (!(LinesOrg[j]).equals(LinesMig[j])) {
-											outputfile.println();
-											outputfile
-													.println("Differs in line: "
-															+ (j + 1));
-											outputfile.println();
-											outputfile.println("Original : "
-													+ LinesOrg[j]);
-											outputfile.println("Migration: "
-													+ LinesMig[j]);
-											outputfile.println();
-											differences++;
-										}
-									}
-									if (differences == 0) {
-										outputfile
-												.println("Both PDF-Files are alike.");
-									}
-
-									else {
-										outputfile.println(differences
-												+ " lines have differences.");
-									}
-								}
-
-								else /* (lenMig > lenOrg) */{
-									for (int j = 0; j < lenOrg; j++) {
-
-										// happens twice, maybe create a method?
-
-										if (!(LinesOrg[j]).equals(LinesMig[j])) {
-											outputfile.println();
-											outputfile
-													.println("Differs in line: "
-															+ (j + 1));
-											outputfile.println();
-											outputfile.println("Original : "
-													+ LinesOrg[j]);
-											outputfile.println("Migration: "
-													+ LinesMig[j]);
-											outputfile.println();
-											differences++;
-										}
-									}
-									if (differences == 0) {
-										outputfile
-												.println("Both PDF-Files are alike.");
-									}
-
-									else {
-										outputfile.println(differences
-												+ " lines have differences.");
-									}
-								}
-							} else {
-								System.out.println("Program closed.");
+							if (!(LinesOrg[j]).equals(LinesMig[j])) {
+								outputfile.println();
+								outputfile.println("Differs in line: "
+										+ (j + 1));
+								outputfile.println();
+								outputfile.println("Original : " + LinesOrg[j]);
+								outputfile.println("Migration: " + LinesMig[j]);
+								outputfile.println();
+								differences++;
 							}
+						}
+						if (differences == 0) {
+							outputfile.println("Both PDF-Files are alike.");
+						}
+
+						else {
+							outputfile.println(differences
+									+ " lines have differences.");
 						}
 					}
 
-					else {
-						System.out
-								.println("One of the files is lacking a PdfHeader.");
-						System.out
-								.println("Please choose two proper Pdf-files");
+					else /* (lenMig > lenOrg) */{
+						for (int j = 0; j < lenOrg; j++) {
+
+					
+
+							if (!(LinesOrg[j]).equals(LinesMig[j])) {
+								outputfile.println();
+								outputfile.println("Differs in line: "
+										+ (j + 1));
+								outputfile.println();
+								outputfile.println("Original : " + LinesOrg[j]);
+								outputfile.println("Migration: " + LinesMig[j]);
+								outputfile.println();
+								differences++;
+							}
+						}
+						if (differences == 0) {
+							outputfile.println("Both PDF-Files are alike.");
+						}
+						else {
+							outputfile.println(differences
+									+ " lines have differences.");
+						}
 					}
-
 				} else {
-					System.out
-							.println("One of the Files or both are too big to be examined:");
-					System.out.println(OrgPdf + " Filesize: " + filesizeOrg);
-					System.out.println(MigPdf + " Filesize: " + filesizeMig);
+					System.out.println("Program closed.");
 				}
-			}
-
-			else {
+			} else {
 				System.out.println("Please choose two files.");
 			}
 

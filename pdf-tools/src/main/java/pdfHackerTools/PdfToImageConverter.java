@@ -12,14 +12,14 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 
 public class PdfToImageConverter {
-	static String t;
+	static String ExaminedFolder;
 	static String newFileName;
 
 	public static void main(String args[]) {
 		try {
-			t = PdfUtilities.chooseFolder();
-			if (t != null) {
-				ArrayList<File> files = PdfUtilities.getPaths(new File(t),
+			ExaminedFolder = PdfUtilities.chooseFolder();
+			if (ExaminedFolder != null) {
+				ArrayList<File> files = PdfUtilities.getPaths(new File(ExaminedFolder),
 						new ArrayList<File>());
 				if (files != null) {
 					for (int i = 0; i < files.size(); i++) {
@@ -34,16 +34,25 @@ public class PdfToImageConverter {
 									convertToJpegPages(testfile);
 								}
 							} catch (IOException e) {
-								System.out.println(e);
+								System.out.println(e); //TODO: Which exception could happen here?
 							}
 						}
 					}
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e);
+			System.out.println(e); //TODO: Which exception could happen here?
 		}
 	}
+	
+	/**
+	 * updates the FileName, as the ".pdf"-extension should be deleted
+	 * 
+	 * @param: input is a String which is the orginal name of the file which has to be converted into xx jpeg pages
+	 * @return: String newFileName which is the original file name minues the ".pdf"-extension
+	 * 
+	 */
+	
 	private static String deletePdfExtension(String NameFilePath) {
 		int lenOld = NameFilePath.length();
 		int lenNew = lenOld - 4;		
@@ -51,6 +60,14 @@ public class PdfToImageConverter {
 				.substring(0, lenNew));
 		return newFileName;
 	}
+	
+	/**
+	 * Converts a PDF file into as many JPEG Pages as the orginal PDF has pages. The JPEG pages are numbered.
+	 * 
+	 * @param: input is the PDF file which has to be converted
+	 * @return: It is void and does not return anything to the main thread, but of course it puts jpegs into the folder....
+	 * 
+	 */
 
 	private static void convertToJpegPages(PDDocument testfile)
 			throws IOException {
